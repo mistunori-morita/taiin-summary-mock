@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>退院時サマリー 下書き画面（モック）</title>
+<style>
+  :root {
+    --purple: #592C8B;
+    --purple-light: #F1ECF6;
+    --text: #333333;
+    --line: #D9D0E5;
+    --gray: #777777;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #ffffff;
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 16px 16px 48px; }
+
+  header h1 {
+    color: var(--purple);
+    font-size: 24px;
+    margin: 8px 0 4px;
+    line-height: 1.4;
+  }
+  header .note { font-size: 13px; color: var(--gray); margin: 0 0 16px; }
+
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  .tabs button {
+    flex: 1 1 160px;
+    font-size: 17px;
+    font-weight: bold;
+    padding: 12px 10px;
+    border: 2px solid var(--purple);
+    border-radius: 8px;
+    background: #ffffff;
+    color: var(--purple);
+    cursor: pointer;
+  }
+  .tabs button[aria-selected="true"] { background: var(--purple); color: #ffffff; }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  h2 {
+    color: var(--purple);
+    font-size: 20px;
+    margin: 0 0 12px;
+    line-height: 1.4;
+  }
+  h3 {
+    color: var(--purple);
+    font-size: 16px;
+    margin: 0 0 6px;
+  }
+  .box {
+    background: var(--purple-light);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+  .explain { font-size: 15px; margin: 12px 0 0; }
+
+  .table-wrap { overflow-x: auto; background: #ffffff; border-radius: 6px; }
+  table { border-collapse: collapse; width: 100%; min-width: 640px; background: #ffffff; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; white-space: nowrap; font-size: 15px; }
+  th { background: #ffffff; color: var(--purple); }
+  tr.added td { background: var(--purple-light); }
+
+  .btn {
+    font-size: 16px;
+    font-weight: bold;
+    padding: 10px 18px;
+    border: 2px solid var(--purple);
+    border-radius: 8px;
+    background: var(--purple);
+    color: #ffffff;
+    cursor: pointer;
+  }
+  .btn:disabled { opacity: 0.5; cursor: default; }
+  .btn.sub { background: #ffffff; color: var(--purple); }
+  .btn.small { font-size: 15px; padding: 6px 12px; }
+
+  .status.making { color: var(--purple); font-weight: bold; }
+  .status.done { color: var(--purple); font-weight: bold; }
+
+  /* ② */
+  .head2 { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 12px; }
+  .timer {
+    font-size: 16px;
+    color: var(--purple);
+    font-weight: bold;
+    background: var(--purple-light);
+    border-radius: 8px;
+    padding: 6px 12px;
+  }
+  .timer span { font-size: 22px; font-variant-numeric: tabular-nums; }
+  .field { margin-bottom: 12px; }
+  .field textarea {
+    width: 100%;
+    min-height: 88px;
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.6;
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px;
+    background: #ffffff;
+    resize: vertical;
+  }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
+  .msg { font-weight: bold; color: var(--purple); margin: 10px 0 0; min-height: 1.6em; }
+  .tiny { font-size: 13px; color: var(--gray); min-height: 1.6em; margin: 4px 0 0; }
+
+  /* ③ */
+  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .kpi { background: var(--purple-light); border-radius: 8px; padding: 14px 16px; }
+  .kpi .label { font-size: 15px; margin-bottom: 4px; }
+  .kpi .num { font-size: 30px; font-weight: bold; color: var(--purple); line-height: 1.3; font-variant-numeric: tabular-nums; }
+  .kpi .num small { font-size: 18px; font-weight: bold; }
+  .reset { margin-top: 12px; font-size: 13px; color: var(--gray); }
+  .reset button {
+    font-size: 13px; color: var(--gray); background: none; border: none; text-decoration: underline; cursor: pointer; padding: 0;
+  }
+
+  @media (max-width: 480px) {
+    header h1 { font-size: 20px; }
+    .tabs button { font-size: 15px; padding: 10px 6px; }
+    .kpi .num { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>退院時サマリー 下書き画面（モック）</h1>
+    <p class="note">表示している数字と文章はすべてサンプルです</p>
+  </header>
+
+  <div class="tabs" role="tablist">
+    <button type="button" role="tab" id="tab1" aria-selected="true" data-tab="1">① 下書きを作る</button>
+    <button type="button" role="tab" id="tab2" aria-selected="false" data-tab="2">② 医師が確認する</button>
+    <button type="button" role="tab" id="tab3" aria-selected="false" data-tab="3">③ 記録</button>
+  </div>
+
+  <!-- ① 下書きを作る -->
+  <section class="panel active" id="panel1" role="tabpanel">
+    <div class="box">
+      <h2>今日退院する患者（サンプル）</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>患者ID</th><th>仮名</th><th>診療科</th><th>入院日→退院日</th><th>主治医</th><th>状態</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="patientRows"></tbody>
+        </table>
+      </div>
+      <p class="explain">カルテの記録から、国が決めた項目の形でAIが下書きを作ります。AIの本体は今あるものを使います。</p>
+    </div>
+  </section>
+
+  <!-- ② 医師が確認する -->
+  <section class="panel" id="panel2" role="tabpanel">
+    <div class="box">
+      <div class="head2">
+        <h2 id="summaryTitle" style="margin:0;">患者A の退院時サマリー（下書き）</h2>
+        <div class="timer">確認にかかった時間 <span id="timer">0:00</span></div>
+      </div>
+
+      <div id="fields"></div>
+
+      <div class="actions">
+        <button type="button" class="btn" id="confirmBtn">確認して確定</button>
+        <button type="button" class="btn sub" id="printBtn">紙に印刷</button>
+        <button type="button" class="btn sub" id="sendBtn">国の仕組みへデータで送る（準備中）</button>
+      </div>
+      <p class="msg" id="confirmMsg"></p>
+      <p class="tiny" id="dummyMsg"></p>
+      <p class="explain">医師は書くのではなく、確認して直すだけ。開いてから確定までの時間が自動で残ります。</p>
+    </div>
+  </section>
+
+  <!-- ③ 記録 -->
+  <section class="panel" id="panel3" role="tabpanel">
+    <div class="kpis">
+      <div class="kpi">
+        <div class="label">今週使った人</div>
+        <div class="num">医師 9/12<small>人</small>・事務 4/5<small>人</small></div>
+      </div>
+      <div class="kpi">
+        <div class="label">医師の確認 平均</div>
+        <div class="num">4<small>分</small>10<small>秒</small></div>
+      </div>
+      <div class="kpi">
+        <div class="label">今月の件数</div>
+        <div class="num"><span id="monthCount">23</span><small>件</small></div>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>日付</th><th>患者ID</th><th>主治医</th><th>確認にかかった時間</th><th>使った人（医師／事務）</th>
+            </tr>
+          </thead>
+          <tbody id="recordRows"></tbody>
+        </table>
+      </div>
+      <p class="explain">この記録は、2026年6月からの国の決まり（AIの下書きを大半の医師と事務の人が日常的に使う病院は、事務の人1人を1.2人と数えてよい）の届け出と、年1回の評価に使います。</p>
+      <p class="explain">数字はすべてサンプルです。</p>
+      <p class="reset"><button type="button" id="resetBtn">②で足した記録を消す（練習用）</button></p>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------- サンプルデータ ----------
+  var FIELD_NAMES = ['病名', '入院の経過', '手術・処置', '退院時の処方', '退院後の方針', '次の受診先'];
+
+  var patients = [
+    { id: 'A-1023', name: '患者A', dept: '内科', stay: '11/3 → 11/12', doctor: '医師1', status: '下書きなし',
+      text: [
+        '急性肺炎（主病名）。高血圧症（併存症）。',
+        '発熱と咳のため◯月◯日に入院。胸のレントゲンで右下の肺に影を確認し、抗菌薬の点滴を開始。3日目に解熱し、5日目から飲み薬に変更。食事と歩行は入院前と同じ状態まで回復。',
+        '手術なし。抗菌薬の点滴（1日目〜4日目）、酸素の投与（1日目〜2日目）。',
+        '抗菌薬の飲み薬 1日2回 あと3日分。血圧の薬 1日1回（入院前から継続）。',
+        '自宅で療養。発熱や息苦しさが出たら早めに受診。1週間後に外来で胸のレントゲンを再確認。',
+        '当院 内科外来 ◯月◯日（◯）10:00。かかりつけ医へ診療情報提供書を渡す。'
+      ] },
+    { id: 'A-1031', name: '患者B', dept: '外科', stay: '11/6 → 11/12', doctor: '医師2', status: '下書きなし',
+      text: [
+        '急性虫垂炎。',
+        '右下腹部の痛みで◯月◯日に入院。CTで虫垂の腫れを確認し、同日に腹腔鏡での手術を実施。翌日から水分、2日目から食事を再開。痛みは飲み薬で落ち着き、傷の状態も問題なし。',
+        '腹腔鏡下虫垂切除術（入院当日）。抗菌薬の点滴（1日目〜3日目）。',
+        '痛み止めの飲み薬 痛いときのみ 5回分。',
+        '1週間は重い物を持たない。傷の赤みや腫れ、発熱があれば受診。',
+        '当院 外科外来 ◯月◯日（◯）14:00 で傷の確認。'
+      ] },
+    { id: 'A-1044', name: '患者C', dept: '整形外科', stay: '10/29 → 11/12', doctor: '医師3', status: '下書きあり',
+      text: [
+        '右手首の骨折。骨粗しょう症。',
+        '転倒して右手首を痛め◯月◯日に入院。翌日に金属の板で固定する手術を実施。術後3日目からリハビリを開始し、指の動きと日常の動作を練習。痛みは飲み薬で対応できる程度まで軽くなった。',
+        '骨折の手術（金属の板で固定、2日目）。リハビリ（4日目〜退院まで）。',
+        '痛み止めの飲み薬 1日3回 7日分。骨粗しょう症の薬 週1回（新たに開始）。',
+        '装具を日中つける。週2回の外来リハビリを続ける。転倒しないよう自宅の段差に注意。',
+        '当院 整形外科外来 ◯月◯日（◯）9:30 でレントゲンの確認。外来リハビリは◯月◯日から。'
+      ] },
+    { id: 'A-1052', name: '患者D', dept: '内科', stay: '11/8 → 11/12', doctor: '医師1', status: '確認済み',
+      text: [
+        '慢性心不全の急性増悪。高血圧症。2型糖尿病。',
+        '息切れとむくみが強くなり◯月◯日に入院。利尿薬の点滴で体の水分を減らし、体重は入院時から3kg減少。5日目から飲み薬に切り替え、息切れなく歩けるようになった。塩分と水分のとり方を栄養士から説明済み。',
+        '手術なし。利尿薬の点滴（1日目〜4日目）、酸素の投与（1日目〜3日目）。',
+        '利尿薬 1日1回（量を増やして継続）。血圧の薬 1日1回。糖尿病の薬 1日2回（変更なし）。',
+        '毎朝体重を測り、2日で2kg以上増えたら受診。塩分は1日6g未満。',
+        '当院 循環器内科外来 ◯月◯日（◯）11:00。かかりつけ医へ診療情報提供書を渡す。'
+      ] }
+  ];
+
+  var sampleRecords = [
+    { date: '11/11', id: 'A-0988', doctor: '医師2', time: '3分50秒', user: '医師' },
+    { date: '11/11', id: 'A-0991', doctor: '医師1', time: '5分20秒', user: '医師' },
+    { date: '11/10', id: 'A-0975', doctor: '医師3', time: '2分40秒', user: '事務' },
+    { date: '11/10', id: 'A-0969', doctor: '医師1', time: '4分05秒', user: '医師' },
+    { date: '11/7',  id: 'A-0952', doctor: '医師2', time: '6分10秒', user: '事務' }
+  ];
+
+  var STORAGE_KEY = 'taiinSummaryMockRecords';
+
+  // ---------- 状態 ----------
+  var current = 0;            // いま②で開いている患者（patients の添字）
+  var timerStart = null;      // タイマー開始時刻（ms）
+  var timerId = null;
+  var elapsedMs = 0;          // 確定時の経過時間
+  var confirmed = false;      // いまの下書きが確定済みか
+
+  // ---------- 便利関数 ----------
+  function $(id) { return document.getElementById(id); }
+  function pad2(n) { return (n < 10 ? '0' : '') + n; }
+  function fmtClock(ms) {
+    var s = Math.floor(ms / 1000);
+    return Math.floor(s / 60) + ':' + pad2(s % 60);
+  }
+  function fmtJa(ms) {
+    var s = Math.floor(ms / 1000);
+    return Math.floor(s / 60) + '分' + pad2(s % 60) + '秒';
+  }
+  function todayLabel() {
+    var d = new Date();
+    return (d.getMonth() + 1) + '/' + d.getDate();
+  }
+
+  function loadRecords() {
+    try {
+      var raw = window.localStorage.getItem(STORAGE_KEY);
+      var arr = raw ? JSON.parse(raw) : [];
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+  }
+  function saveRecords(arr) {
+    try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); } catch (e) { /* 保存できない環境では何もしない */ }
+  }
+  var addedRecords = loadRecords();
+
+  // ---------- タブ ----------
+  function showTab(n) {
+    var i;
+    for (i = 1; i <= 3; i++) {
+      $('tab' + i).setAttribute('aria-selected', i === n ? 'true' : 'false');
+      $('panel' + i).className = 'panel' + (i === n ? ' active' : '');
+    }
+    if (n === 2) startTimer();
+    if (n === 3) renderRecords();
+  }
+  var tabButtons = document.querySelectorAll('.tabs button');
+  Array.prototype.forEach.call(tabButtons, function (b) {
+    b.addEventListener('click', function () { showTab(parseInt(b.getAttribute('data-tab'), 10)); });
+  });
+
+  // ---------- ① 患者の表 ----------
+  function renderPatients() {
+    var tbody = $('patientRows');
+    tbody.innerHTML = '';
+    patients.forEach(function (p, idx) {
+      var tr = document.createElement('tr');
+      var cells = [p.id, p.name, p.dept, p.stay, p.doctor];
+      cells.forEach(function (c) {
+        var td = document.createElement('td');
+        td.textContent = c;
+        tr.appendChild(td);
+      });
+      var tdStatus = document.createElement('td');
+      tdStatus.textContent = p.status;
+      tdStatus.className = 'status' + (p.status === '確認済み' ? ' done' : '');
+      tdStatus.id = 'status-' + idx;
+      tr.appendChild(tdStatus);
+
+      var tdBtn = document.createElement('td');
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn small';
+      btn.textContent = '下書きを作る';
+      btn.addEventListener('click', function () { makeDraft(idx, btn); });
+      tdBtn.appendChild(btn);
+      tr.appendChild(tdBtn);
+      tbody.appendChild(tr);
+    });
+  }
+
+  function makeDraft(idx, btn) {
+    var td = $('status-' + idx);
+    btn.disabled = true;
+    td.textContent = '作成中…（約1分）';
+    td.className = 'status making';
+    window.setTimeout(function () {
+      patients[idx].status = '下書きあり';
+      td.textContent = '下書きあり';
+      td.className = 'status';
+      btn.disabled = false;
+      openDraft(idx);
+      showTab(2);
+    }, 1000);
+  }
+
+  // ---------- ② 下書きの確認 ----------
+  function renderFields(p) {
+    var wrap = $('fields');
+    wrap.innerHTML = '';
+    FIELD_NAMES.forEach(function (name, i) {
+      var div = document.createElement('div');
+      div.className = 'field';
+      var h = document.createElement('h3');
+      h.textContent = name;
+      var ta = document.createElement('textarea');
+      ta.value = p.text[i];
+      ta.setAttribute('aria-label', name);
+      div.appendChild(h);
+      div.appendChild(ta);
+      wrap.appendChild(div);
+    });
+  }
+
+  function openDraft(idx) {
+    current = idx;
+    $('summaryTitle').textContent = patients[idx].name + ' の退院時サマリー（下書き）';
+    renderFields(patients[idx]);
+    resetTimer();
+    confirmed = false;
+    $('confirmBtn').disabled = false;
+    $('confirmMsg').textContent = '';
+    $('dummyMsg').textContent = '';
+  }
+
+  function resetTimer() {
+    if (timerId) { window.clearInterval(timerId); timerId = null; }
+    timerStart = null;
+    elapsedMs = 0;
+    $('timer').textContent = '0:00';
+  }
+  function startTimer() {
+    if (confirmed || timerId) return;
+    if (timerStart === null) timerStart = Date.now();
+    timerId = window.setInterval(function () {
+      $('timer').textContent = fmtClock(Date.now() - timerStart);
+    }, 250);
+  }
+  function stopTimer() {
+    if (timerId) { window.clearInterval(timerId); timerId = null; }
+    elapsedMs = timerStart === null ? 0 : Date.now() - timerStart;
+    $('timer').textContent = fmtClock(elapsedMs);
+  }
+
+  $('confirmBtn').addEventListener('click', function () {
+    if (confirmed) return;
+    stopTimer();
+    confirmed = true;
+    $('confirmBtn').disabled = true;
+    $('confirmMsg').textContent = '確定しました（医師の確認 ' + fmtJa(elapsedMs) + '）';
+
+    var p = patients[current];
+    p.status = '確認済み';
+    var td = $('status-' + current);
+    if (td) { td.textContent = '確認済み'; td.className = 'status done'; }
+
+    addedRecords.unshift({ date: todayLabel(), id: p.id, doctor: p.doctor, time: fmtJa(elapsedMs), user: '医師' });
+    saveRecords(addedRecords);
+    renderRecords();
+  });
+
+  function showDummy() {
+    var el = $('dummyMsg');
+    el.textContent = 'モックのため動きません';
+    window.setTimeout(function () { if (el.textContent === 'モックのため動きません') el.textContent = ''; }, 3000);
+  }
+  $('printBtn').addEventListener('click', showDummy);
+  $('sendBtn').addEventListener('click', showDummy);
+
+  // ---------- ③ 記録 ----------
+  function renderRecords() {
+    var tbody = $('recordRows');
+    tbody.innerHTML = '';
+    function addRow(r, added) {
+      var tr = document.createElement('tr');
+      if (added) tr.className = 'added';
+      [r.date, r.id, r.doctor, r.time, r.user].forEach(function (c) {
+        var td = document.createElement('td');
+        td.textContent = c;
+        tr.appendChild(td);
+      });
+      tbody.appendChild(tr);
+    }
+    addedRecords.forEach(function (r) { addRow(r, true); });
+    sampleRecords.forEach(function (r) { addRow(r, false); });
+    $('monthCount').textContent = String(23 + addedRecords.length);
+  }
+
+  $('resetBtn').addEventListener('click', function () {
+    addedRecords = [];
+    saveRecords(addedRecords);
+    renderRecords();
+  });
+
+  // ---------- 初期表示 ----------
+  renderPatients();
+  openDraft(0);
+  renderRecords();
+})();
+</script>
+</body>
+</html>
