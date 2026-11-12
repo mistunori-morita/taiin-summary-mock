@@ -1,483 +1,555 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex">
-<title>退院時サマリー 下書き画面（モック）</title>
+<title>退院時サマリー（画面の例）</title>
 <style>
-  :root {
-    --purple: #592C8B;
-    --purple-light: #F1ECF6;
-    --text: #333333;
-    --line: #D9D0E5;
-    --gray: #777777;
-  }
-  * { box-sizing: border-box; }
-  html, body { margin: 0; padding: 0; }
-  body {
-    background: #ffffff;
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
-    font-size: 16px;
-    line-height: 1.7;
-  }
-  .wrap { max-width: 960px; margin: 0 auto; padding: 16px 16px 48px; }
+:root{
+  --bg:#F4F6F8; --card:#FFFFFF; --ink:#111827; --ink2:#374151; --muted:#6B7280; --line:#D9DEE3;
+  --blue:#1A5FB4; --blue-dark:#154C90; --blue-soft:#E8F0FA;
+  --green:#1B7F3B; --green-soft:#E6F4EA;
+  --amber:#8A5300; --amber-soft:#FFF4E0; --amber-line:#E7B96B;
+  --red:#B3261E; --red-soft:#FCEBEA;
+}
+*{box-sizing:border-box}
+html{font-size:18px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI","Meiryo",sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+button:focus-visible,textarea:focus-visible{outline:3px solid #93C5FD;outline-offset:2px}
 
-  header h1 {
-    color: var(--purple);
-    font-size: 24px;
-    margin: 8px 0 4px;
-    line-height: 1.4;
-  }
-  header .note { font-size: 13px; color: var(--gray); margin: 0 0 16px; }
+.top{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.top-in{max-width:1040px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.app{font-weight:700;font-size:1.15rem;display:flex;align-items:center;gap:10px}
+.app svg{width:28px;height:28px;color:var(--blue)}
+.app .h{font-weight:500;color:var(--muted);font-size:.85rem;margin-left:4px}
+.roles{margin-left:auto;display:flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.roles button{border:0;background:#fff;padding:10px 18px;font-size:.95rem;color:var(--ink2);min-height:48px}
+.roles button+button{border-left:1px solid var(--line)}
+.roles button[aria-selected=true]{background:var(--blue);color:#fff;font-weight:700}
+.sample{background:#EEF1F4;color:#4B5563;text-align:center;font-size:.85rem;padding:6px 12px}
 
-  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-  .tabs button {
-    flex: 1 1 160px;
-    font-size: 17px;
-    font-weight: bold;
-    padding: 12px 10px;
-    border: 2px solid var(--purple);
-    border-radius: 8px;
-    background: #ffffff;
-    color: var(--purple);
-    cursor: pointer;
-  }
-  .tabs button[aria-selected="true"] { background: var(--purple); color: #ffffff; }
+main{max-width:1040px;margin:0 auto;padding:24px 20px 130px}
+h1{font-size:1.4rem;margin:0 0 6px;line-height:1.4}
+.sub{color:var(--ink2);margin:0 0 20px;font-size:1rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-bottom:14px}
+.row{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
+.pname{font-size:1.3rem;font-weight:700;line-height:1.4}
+.pname .pid{font-size:.95rem;font-weight:500;color:var(--muted);margin-left:8px}
+.pmeta{color:var(--ink2);font-size:.95rem;margin-top:2px}
+.spacer{flex:1}
+.chip{display:inline-block;padding:4px 12px;border-radius:999px;font-weight:700;font-size:.9rem;white-space:nowrap;line-height:1.6}
+.chip.review{background:var(--blue-soft);color:var(--blue)}
+.chip.done{background:var(--green-soft);color:var(--green)}
+.chip.none{background:#EEF1F4;color:#4B5563}
+.chip.warn{background:var(--amber-soft);color:var(--amber)}
+.chip.making{background:#EEF1F4;color:#4B5563}
 
-  .panel { display: none; }
-  .panel.active { display: block; }
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:12px;padding:12px 24px;min-height:52px;font-weight:700;font-size:1rem;border:2px solid transparent;text-decoration:none;white-space:nowrap}
+.btn.primary{background:var(--blue);color:#fff}
+.btn.primary:hover{background:var(--blue-dark)}
+.btn.secondary{background:#fff;color:var(--blue);border-color:var(--blue)}
+.btn.secondary:hover{background:var(--blue-soft)}
+.btn.ghost{background:#fff;color:var(--ink2);border-color:var(--line)}
+.btn.ghost:hover{background:#F3F4F6}
+.btn.big{font-size:1.1rem;padding:16px 34px;min-height:62px}
+.btn.ok{background:var(--green);color:#fff}
+.btn.ok:hover{background:#166532}
+.btn[disabled]{opacity:.5;cursor:default}
+.link{background:none;border:0;color:var(--blue);text-decoration:underline;font-size:.95rem;padding:6px 4px;min-height:40px}
+.link.small{font-size:.85rem;color:var(--muted)}
 
-  h2 {
-    color: var(--purple);
-    font-size: 20px;
-    margin: 0 0 12px;
-    line-height: 1.4;
-  }
-  h3 {
-    color: var(--purple);
-    font-size: 16px;
-    margin: 0 0 6px;
-  }
-  .box {
-    background: var(--purple-light);
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
-  }
-  .explain { font-size: 15px; margin: 12px 0 0; }
+.back{margin-bottom:12px}
+.phead{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.alert{border:2px solid var(--amber-line);background:var(--amber-soft);color:var(--amber);border-radius:12px;padding:12px 16px;margin-bottom:14px;font-weight:700}
+.field{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin-bottom:12px;scroll-margin-top:90px}
+.field.warn{border:2px solid var(--amber-line);background:#FFFBF2}
+.field.flash{box-shadow:0 0 0 4px #FCD34D}
+.flabel{font-size:.95rem;color:var(--ink2);font-weight:700;display:flex;align-items:center;gap:10px;margin-bottom:6px;flex-wrap:wrap}
+.fval{font-size:1.08rem;white-space:pre-wrap;line-height:1.75}
+.fval.empty{color:var(--amber);font-weight:700}
+.fsrc{margin-top:10px;display:flex;align-items:center;gap:6px 14px;flex-wrap:wrap;font-size:.9rem;color:var(--muted)}
+.srcs{margin-top:10px}
+.src{border-left:4px solid #BFD3EE;padding:8px 14px;background:#F8FAFC;border-radius:8px;font-size:.95rem;margin-top:8px}
+.src .d{font-weight:700;color:var(--ink2);margin-right:10px}
+.src .k{color:var(--muted);margin-right:10px}
+textarea{width:100%;font:inherit;font-size:1.08rem;line-height:1.75;padding:12px 14px;border:2px solid var(--blue);border-radius:10px;min-height:130px;resize:vertical;color:var(--ink);background:#fff}
+textarea.rec{border-color:var(--line);min-height:220px;font-size:1rem}
+.editbar{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
 
-  .table-wrap { overflow-x: auto; background: #ffffff; border-radius: 6px; }
-  table { border-collapse: collapse; width: 100%; min-width: 640px; background: #ffffff; }
-  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; white-space: nowrap; font-size: 15px; }
-  th { background: #ffffff; color: var(--purple); }
-  tr.added td { background: var(--purple-light); }
+.actions{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);box-shadow:0 -4px 16px rgba(0,0,0,.06);z-index:4}
+.actions-in{max-width:1040px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.timer{color:var(--muted);font-size:.9rem;display:flex;align-items:center;gap:8px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--green);display:inline-block}
 
-  .btn {
-    font-size: 16px;
-    font-weight: bold;
-    padding: 10px 18px;
-    border: 2px solid var(--purple);
-    border-radius: 8px;
-    background: var(--purple);
-    color: #ffffff;
-    cursor: pointer;
-  }
-  .btn:disabled { opacity: 0.5; cursor: default; }
-  .btn.sub { background: #ffffff; color: var(--purple); }
-  .btn.small { font-size: 15px; padding: 6px 12px; }
+.done-card{text-align:center;padding:44px 24px 36px}
+.done-card .ck{width:76px;height:76px;border-radius:50%;background:var(--green-soft);color:var(--green);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px}
+.done-card .ck svg{width:40px;height:40px}
+.done-card h1{font-size:1.5rem}
+.done-card .t{font-size:1.05rem;color:var(--ink2);margin:6px 0 22px}
+.done-card .t b{color:var(--ink);font-size:1.3rem}
+.btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.minor{margin-top:22px;display:flex;gap:6px 22px;justify-content:center;flex-wrap:wrap}
 
-  .status.making { color: var(--purple); font-weight: bold; }
-  .status.done { color: var(--purple); font-weight: bold; }
+.kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+.kpi .card{margin:0}
+.kpi .l{color:var(--ink2);font-size:.95rem;font-weight:700}
+.kpi .n{font-size:2.3rem;font-weight:800;line-height:1.2;margin-top:4px;letter-spacing:-.01em}
+.kpi .n small{font-size:1rem;font-weight:700;color:var(--ink2);margin-left:2px}
+.kpi .m{color:var(--muted);font-size:.9rem;margin-top:4px}
+.bar{height:12px;background:#EEF1F4;border-radius:6px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:var(--blue)}
+.bar.g i{background:var(--green)}
+.tblwrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:1rem}
+th{text-align:left;color:var(--ink2);font-weight:700;padding:10px 10px;border-bottom:2px solid var(--line);white-space:nowrap}
+td{padding:12px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.note{color:var(--ink2);font-size:.95rem;margin:0 0 6px}
+.progress{height:14px;background:#EEF1F4;border-radius:7px;overflow:hidden;margin:12px 0}
+.progress i{display:block;height:100%;width:0;background:var(--blue);transition:width 2.2s linear}
+.result{border:2px solid var(--green);background:var(--green-soft);border-radius:12px;padding:14px 18px;margin-top:14px}
+.result b{color:var(--green)}
+.steps{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px;padding:0;list-style:none}
+.steps li{background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 16px;font-size:.95rem;color:var(--ink2)}
+.steps li b{color:var(--blue);margin-right:6px}
 
-  /* ② */
-  .head2 { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 8px; margin-bottom: 12px; }
-  .timer {
-    font-size: 16px;
-    color: var(--purple);
-    font-weight: bold;
-    background: var(--purple-light);
-    border-radius: 8px;
-    padding: 6px 12px;
-  }
-  .timer span { font-size: 22px; font-variant-numeric: tabular-nums; }
-  .field { margin-bottom: 12px; }
-  .field textarea {
-    width: 100%;
-    min-height: 88px;
-    font-family: inherit;
-    font-size: 16px;
-    line-height: 1.6;
-    color: var(--text);
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    padding: 10px;
-    background: #ffffff;
-    resize: vertical;
-  }
-  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 8px; }
-  .msg { font-weight: bold; color: var(--purple); margin: 10px 0 0; min-height: 1.6em; }
-  .tiny { font-size: 13px; color: var(--gray); min-height: 1.6em; margin: 4px 0 0; }
+.toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);background:#111827;color:#fff;padding:12px 20px;border-radius:12px;font-size:1rem;opacity:0;transition:opacity .2s;pointer-events:none;z-index:6;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
 
-  /* ③ */
-  .kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
-  .kpi { background: var(--purple-light); border-radius: 8px; padding: 14px 16px; }
-  .kpi .label { font-size: 15px; margin-bottom: 4px; }
-  .kpi .num { font-size: 30px; font-weight: bold; color: var(--purple); line-height: 1.3; font-variant-numeric: tabular-nums; }
-  .kpi .num small { font-size: 18px; font-weight: bold; }
-  .reset { margin-top: 12px; font-size: 13px; color: var(--gray); }
-  .reset button {
-    font-size: 13px; color: var(--gray); background: none; border: none; text-decoration: underline; cursor: pointer; padding: 0;
-  }
-
-  @media (max-width: 480px) {
-    header h1 { font-size: 20px; }
-    .tabs button { font-size: 15px; padding: 10px 6px; }
-    .kpi .num { font-size: 26px; }
-  }
+@media (max-width:760px){
+  html{font-size:17px}
+  .kpi{grid-template-columns:1fr}
+  .roles{margin-left:0;width:100%}
+  .roles button{flex:1;padding:10px 6px}
+  .row .btn{width:100%}
+  .actions-in .btn{flex:1}
+  .card,.field{padding:16px 16px}
+}
+@media print{.top,.sample,.actions,.back,.editbar,.link{display:none}}
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <h1>退院時サマリー 下書き画面（モック）</h1>
-    <p class="note">表示している数字と文章はすべてサンプルです</p>
-  </header>
-
-  <div class="tabs" role="tablist">
-    <button type="button" role="tab" id="tab1" aria-selected="true" data-tab="1">① 下書きを作る</button>
-    <button type="button" role="tab" id="tab2" aria-selected="false" data-tab="2">② 医師が確認する</button>
-    <button type="button" role="tab" id="tab3" aria-selected="false" data-tab="3">③ 記録</button>
+<header class="top">
+  <div class="top-in">
+    <div class="app">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg>
+      退院時サマリー <span class="h">◯◯病院（画面の例）</span>
+    </div>
+    <div class="roles" role="tablist" aria-label="使う人を切り替える">
+      <button role="tab" data-role="doctor">医師</button>
+      <button role="tab" data-role="clerk">事務</button>
+      <button role="tab" data-role="admin">管理</button>
+    </div>
   </div>
-
-  <!-- ① 下書きを作る -->
-  <section class="panel active" id="panel1" role="tabpanel">
-    <div class="box">
-      <h2>今日退院する患者（サンプル）</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>患者ID</th><th>仮名</th><th>診療科</th><th>入院日→退院日</th><th>主治医</th><th>状態</th><th></th>
-            </tr>
-          </thead>
-          <tbody id="patientRows"></tbody>
-        </table>
-      </div>
-      <p class="explain">カルテの記録から、国が決めた項目の形でAIが下書きを作ります。AIの本体は今あるものを使います。</p>
-    </div>
-  </section>
-
-  <!-- ② 医師が確認する -->
-  <section class="panel" id="panel2" role="tabpanel">
-    <div class="box">
-      <div class="head2">
-        <h2 id="summaryTitle" style="margin:0;">患者A の退院時サマリー（下書き）</h2>
-        <div class="timer">確認にかかった時間 <span id="timer">0:00</span></div>
-      </div>
-
-      <div id="fields"></div>
-
-      <div class="actions">
-        <button type="button" class="btn" id="confirmBtn">確認して確定</button>
-        <button type="button" class="btn sub" id="printBtn">紙に印刷</button>
-        <button type="button" class="btn sub" id="sendBtn">国の仕組みへデータで送る（準備中）</button>
-      </div>
-      <p class="msg" id="confirmMsg"></p>
-      <p class="tiny" id="dummyMsg"></p>
-      <p class="explain">医師は書くのではなく、確認して直すだけ。開いてから確定までの時間が自動で残ります。</p>
-    </div>
-  </section>
-
-  <!-- ③ 記録 -->
-  <section class="panel" id="panel3" role="tabpanel">
-    <div class="kpis">
-      <div class="kpi">
-        <div class="label">今週使った人</div>
-        <div class="num">医師 9/12<small>人</small>・事務 4/5<small>人</small></div>
-      </div>
-      <div class="kpi">
-        <div class="label">医師の確認 平均</div>
-        <div class="num">4<small>分</small>10<small>秒</small></div>
-      </div>
-      <div class="kpi">
-        <div class="label">今月の件数</div>
-        <div class="num"><span id="monthCount">23</span><small>件</small></div>
-      </div>
-    </div>
-
-    <div class="box">
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>日付</th><th>患者ID</th><th>主治医</th><th>確認にかかった時間</th><th>使った人（医師／事務）</th>
-            </tr>
-          </thead>
-          <tbody id="recordRows"></tbody>
-        </table>
-      </div>
-      <p class="explain">この記録は、2026年6月からの国の決まり（AIの下書きを大半の医師と事務の人が日常的に使う病院は、事務の人1人を1.2人と数えてよい）の届け出と、年1回の評価に使います。</p>
-      <p class="explain">数字はすべてサンプルです。</p>
-      <p class="reset"><button type="button" id="resetBtn">②で足した記録を消す（練習用）</button></p>
-    </div>
-  </section>
-</div>
+</header>
+<div class="sample">表示している患者・数字・文章はすべてサンプルです</div>
+<main id="view"></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
 (function () {
   'use strict';
 
   // ---------- サンプルデータ ----------
-  var FIELD_NAMES = ['病名', '入院の経過', '手術・処置', '退院時の処方', '退院後の方針', '次の受診先'];
-
-  var patients = [
-    { id: 'A-1023', name: '患者A', dept: '内科', stay: '11/3 → 11/12', doctor: '医師1', status: '下書きなし',
-      text: [
-        '急性肺炎。高血圧症（入院前からの持病）。',
-        '発熱と咳のため◯月◯日に入院。胸のレントゲンで右下の肺に影を確認し、抗菌薬の点滴を開始。3日目に解熱し、5日目から飲み薬に変更。食事と歩行は入院前と同じ状態まで回復。',
-        '手術なし。抗菌薬の点滴（1日目〜4日目）、酸素の投与（1日目〜2日目）。',
-        '抗菌薬の飲み薬 1日2回 あと3日分。血圧の薬 1日1回（入院前から継続）。',
-        '自宅で療養。発熱や息苦しさが出たら早めに受診。1週間後に外来で胸のレントゲンを再確認。',
-        '当院 内科外来 ◯月◯日（◯）10:00。かかりつけ医への紹介状を渡す。'
+  var P = [
+    { id: 'A-1023', name: '患者A', age: '78歳 男性', dept: '内科', ward: '5階東', admit: '11/3', dis: '11/12', doctor: '医師1',
+      status: 'review', draftBy: '事務A', draftAt: '9:14',
+      rec: [
+        { d: '11/3',  k: '入院時の記録', t: '3日前から発熱と咳。胸のレントゲンで右下の肺に影。酸素 2L を開始。抗菌薬の点滴を開始。' },
+        { d: '11/3',  k: '看護の記録',   t: '体温 38.6℃。食事は半分。トイレは付き添いで歩行。' },
+        { d: '11/4',  k: '経過の記録',   t: '酸素を中止。' },
+        { d: '11/5',  k: '経過の記録',   t: '解熱（36.8℃）。咳は軽くなった。' },
+        { d: '11/7',  k: '経過の記録',   t: '抗菌薬を点滴から飲み薬に変更。' },
+        { d: '11/10', k: '経過の記録',   t: '歩行は入院前と同じ。食事は全量。退院を 11/12 に決定。' },
+        { d: '11/11', k: '薬の記録',     t: '退院時の処方：抗菌薬の飲み薬 1日2回 3日分。血圧の薬 1日1回 継続。' },
+        { d: '11/11', k: '医師の指示',   t: '1週間後に外来で胸のレントゲンを再確認。かかりつけ医へ紹介状。' }
+      ],
+      f: [
+        { k: '病名', v: '急性肺炎。高血圧症（入院前からの持病）。', s: [0] },
+        { k: '入院した理由', v: '3日前からの発熱と咳。胸のレントゲンで右下の肺に影があり、入院。', s: [0] },
+        { k: '入院中の経過', v: '入院日から抗菌薬の点滴と酸素を開始。2日目に酸素を中止、3日目に解熱。5日目に点滴から飲み薬に変更。8日目には歩行と食事が入院前と同じ状態に戻り、退院を決定。', s: [0, 2, 3, 4, 5] },
+        { k: '手術・処置・主な検査', v: '手術なし。抗菌薬の点滴（11/3〜11/7）。酸素（11/3〜11/4）。胸のレントゲン（11/3）。', s: [0, 2, 4] },
+        { k: '退院時の処方（薬）', v: '抗菌薬の飲み薬 1日2回 3日分。血圧の薬 1日1回（入院前から継続）。', s: [6] },
+        { k: 'アレルギー・薬の注意', v: '', s: [], warn: true },
+        { k: '退院時の状態', v: '歩行・食事は入院前と同じ。', s: [5] },
+        { k: '退院後の方針・次の受診', v: '自宅で療養。1週間後に当院の外来で胸のレントゲンを再確認。かかりつけ医へ紹介状を渡す。発熱や息苦しさが出たら早めに受診。', s: [7] }
       ] },
-    { id: 'A-1031', name: '患者B', dept: '外科', stay: '11/6 → 11/12', doctor: '医師2', status: '下書きなし',
-      text: [
-        '急性虫垂炎。',
-        '右下腹部の痛みで◯月◯日に入院。CTで虫垂の腫れを確認し、同日に小さな穴からカメラを入れる手術を実施。翌日から水分、2日目から食事を再開。痛みは飲み薬で落ち着き、傷の状態も問題なし。',
-        '虫垂を取る手術（小さな穴からカメラを入れる方法、入院当日）。抗菌薬の点滴（1日目〜3日目）。',
-        '痛み止めの飲み薬 痛いときのみ 5回分。',
-        '1週間は重い物を持たない。傷の赤みや腫れ、発熱があれば受診。',
-        '当院 外科外来 ◯月◯日（◯）14:00 で傷の確認。'
+    { id: 'A-1031', name: '患者B', age: '45歳 女性', dept: '外科', ward: '4階西', admit: '11/6', dis: '11/12', doctor: '医師1',
+      status: 'review', draftBy: '事務A', draftAt: '9:20',
+      rec: [
+        { d: '11/6',  k: '入院時の記録', t: '右下腹部の痛み。CTで虫垂の腫れ。アレルギー：なし（本人に確認）。' },
+        { d: '11/6',  k: '手術の記録',   t: '小さな穴からカメラを入れる方法で虫垂を取る手術。出血は少量。' },
+        { d: '11/7',  k: '経過の記録',   t: '水分を再開。痛みは飲み薬で落ち着いている。' },
+        { d: '11/8',  k: '経過の記録',   t: '食事を再開。傷の状態に問題なし。' },
+        { d: '11/11', k: '薬の記録',     t: '退院時の処方：痛み止めの飲み薬 痛いときのみ 5回分。' },
+        { d: '11/11', k: '医師の指示',   t: '1週間後に外来で傷の確認。1週間は重い物を持たない。' }
+      ],
+      f: [
+        { k: '病名', v: '急性虫垂炎。', s: [0] },
+        { k: '入院した理由', v: '右下腹部の痛み。CTで虫垂の腫れがあり、入院。', s: [0] },
+        { k: '入院中の経過', v: '入院当日に手術。翌日から水分、2日目から食事を再開。痛みは飲み薬で落ち着き、傷の状態も問題なし。', s: [1, 2, 3] },
+        { k: '手術・処置・主な検査', v: '虫垂を取る手術（小さな穴からカメラを入れる方法、11/6）。CT（11/6）。', s: [0, 1] },
+        { k: '退院時の処方（薬）', v: '痛み止めの飲み薬 痛いときのみ 5回分。', s: [4] },
+        { k: 'アレルギー・薬の注意', v: 'なし（11/6 本人に確認）。', s: [0] },
+        { k: '退院時の状態', v: '食事・歩行は通常どおり。傷に問題なし。', s: [3] },
+        { k: '退院後の方針・次の受診', v: '1週間後に当院の外来で傷の確認。1週間は重い物を持たない。傷の赤みや腫れ、発熱があれば受診。', s: [5] }
       ] },
-    { id: 'A-1044', name: '患者C', dept: '整形外科', stay: '10/29 → 11/12', doctor: '医師3', status: '下書きあり',
-      text: [
-        '右手首の骨折。骨粗しょう症。',
-        '転倒して右手首を痛め◯月◯日に入院。翌日に金属の板で固定する手術を実施。術後3日目からリハビリを開始し、指の動きと日常の動作を練習。痛みは飲み薬で対応できる程度まで軽くなった。',
-        '骨折の手術（金属の板で固定、2日目）。リハビリ（4日目〜退院まで）。',
-        '痛み止めの飲み薬 1日3回 7日分。骨粗しょう症の薬 週1回（新たに開始）。',
-        '装具を日中つける。週2回の外来リハビリを続ける。転倒しないよう自宅の段差に注意。',
-        '当院 整形外科外来 ◯月◯日（◯）9:30 でレントゲンの確認。外来リハビリは◯月◯日から。'
+    { id: 'A-1044', name: '患者C', age: '82歳 女性', dept: '整形外科', ward: '3階東', admit: '10/29', dis: '11/12', doctor: '医師1',
+      status: 'done', draftBy: '事務B', draftAt: '8:31', doneAt: '8:50', sec: 190,
+      rec: [
+        { d: '10/29', k: '入院時の記録', t: '転倒して右手首を痛めて受診。レントゲンで右手首の骨折。薬のアレルギー：なし。' },
+        { d: '10/30', k: '手術の記録',   t: '金属の板で骨を固定する手術。' },
+        { d: '11/2',  k: 'リハビリの記録', t: '指の動きと日常の動作の練習を開始。' },
+        { d: '11/10', k: '経過の記録',   t: '痛みは飲み薬で対応できる程度。装具を日中つける。退院を 11/12 に決定。' },
+        { d: '11/11', k: '薬の記録',     t: '退院時の処方：痛み止め 1日3回 7日分。骨を強くする薬 週1回（新たに開始）。' },
+        { d: '11/11', k: '医師の指示',   t: '外来は 11/19 にレントゲン。外来リハビリ 週2回。' }
+      ],
+      f: [
+        { k: '病名', v: '右手首の骨折。骨粗しょう症。', s: [0] },
+        { k: '入院した理由', v: '転倒して右手首を痛め、レントゲンで骨折。', s: [0] },
+        { k: '入院中の経過', v: '翌日に金属の板で固定する手術。術後3日目からリハビリを開始。痛みは飲み薬で対応できる程度まで軽くなった。', s: [1, 2, 3] },
+        { k: '手術・処置・主な検査', v: '骨を金属の板で固定する手術（10/30）。リハビリ（11/2〜退院まで）。', s: [1, 2] },
+        { k: '退院時の処方（薬）', v: '痛み止め 1日3回 7日分。骨を強くする薬 週1回（新たに開始）。', s: [4] },
+        { k: 'アレルギー・薬の注意', v: '薬のアレルギー：なし。', s: [0] },
+        { k: '退院時の状態', v: '装具を日中つける。身の回りのことは自分でできる。', s: [3] },
+        { k: '退院後の方針・次の受診', v: '11/19 に当院の外来でレントゲン。外来リハビリを週2回続ける。転倒しないよう自宅の段差に注意。', s: [5] }
       ] },
-    { id: 'A-1052', name: '患者D', dept: '内科', stay: '11/8 → 11/12', doctor: '医師1', status: '確認済み',
-      text: [
-        '心不全（心臓の働きが弱る持病）の悪化。高血圧症。2型糖尿病。',
-        '息切れとむくみが強くなり◯月◯日に入院。尿を出す薬（利尿薬）の点滴で体の水分を減らし、体重は入院時から3kg減少。5日目から飲み薬に切り替え、息切れなく歩けるようになった。塩分と水分のとり方を栄養士から説明済み。',
-        '手術なし。利尿薬の点滴（1日目〜4日目）、酸素の投与（1日目〜3日目）。',
-        '利尿薬 1日1回（量を増やして継続）。血圧の薬 1日1回。糖尿病の薬 1日2回（変更なし）。',
-        '毎朝体重を測り、2日で2kg以上増えたら受診。塩分は1日6g未満。',
-        '当院 循環器内科外来 ◯月◯日（◯）11:00。かかりつけ医への紹介状を渡す。'
+    { id: 'A-1052', name: '患者D', age: '71歳 男性', dept: '内科', ward: '5階東', admit: '11/8', dis: '11/12', doctor: '医師1',
+      status: 'none',
+      rec: [
+        { d: '11/8',  k: '入院時の記録', t: '息切れとむくみが強くなり受診。心不全の悪化。体重 68kg。過去に造影剤でじんましん。' },
+        { d: '11/8',  k: '経過の記録',   t: '尿を出す薬（利尿薬）の点滴を開始。酸素 1L。' },
+        { d: '11/10', k: '経過の記録',   t: '酸素を中止。体重 66kg。' },
+        { d: '11/11', k: '経過の記録',   t: '体重 65kg。息切れなく廊下を歩ける。塩分と水分のとり方を栄養士から説明。退院を 11/12 に決定。' },
+        { d: '11/11', k: '薬の記録',     t: '退院時の処方：利尿薬 1日1回（量を増やして継続）。血圧の薬 1日1回。糖尿病の薬 1日2回（変更なし）。' },
+        { d: '11/11', k: '医師の指示',   t: '2週間後に循環器内科の外来。毎朝体重を測り、2日で2kg以上増えたら受診。' }
+      ],
+      f: [
+        { k: '病名', v: '心不全（心臓の働きが弱る持病）の悪化。高血圧症。2型糖尿病。', s: [0] },
+        { k: '入院した理由', v: '息切れとむくみが強くなり、心不全の悪化で入院。', s: [0] },
+        { k: '入院中の経過', v: '尿を出す薬の点滴と酸素を開始。3日目に酸素を中止。体重は 68kg から 65kg に減り、息切れなく歩けるようになった。塩分と水分のとり方を栄養士から説明。', s: [1, 2, 3] },
+        { k: '手術・処置・主な検査', v: '手術なし。利尿薬の点滴（11/8〜11/10）。酸素（11/8〜11/10）。', s: [1, 2] },
+        { k: '退院時の処方（薬）', v: '利尿薬 1日1回（量を増やして継続）。血圧の薬 1日1回。糖尿病の薬 1日2回（変更なし）。', s: [4] },
+        { k: 'アレルギー・薬の注意', v: '過去に造影剤でじんましん（11/8 記録）。', s: [0] },
+        { k: '退院時の状態', v: '息切れなく廊下を歩ける。体重 65kg。', s: [3] },
+        { k: '退院後の方針・次の受診', v: '2週間後に当院の循環器内科の外来。毎朝体重を測り、2日で 2kg 以上増えたら受診。塩分は控えめに。', s: [5] }
       ] }
   ];
 
-  var sampleRecords = [
-    { date: '11/11', id: 'A-0988', doctor: '医師2', time: '3分50秒', user: '医師' },
-    { date: '11/11', id: 'A-0991', doctor: '医師1', time: '5分20秒', user: '医師' },
-    { date: '11/10', id: 'A-0975', doctor: '医師3', time: '2分40秒', user: '事務' },
-    { date: '11/10', id: 'A-0969', doctor: '医師1', time: '4分05秒', user: '医師' },
-    { date: '11/7',  id: 'A-0952', doctor: '医師2', time: '6分10秒', user: '事務' }
+  var SAMPLE_LOG = [
+    { date: '11/11', id: 'A-0991', doctor: '医師1', sec: 320, who: '医師' },
+    { date: '11/11', id: 'A-0988', doctor: '医師2', sec: 230, who: '医師' },
+    { date: '11/10', id: 'A-0975', doctor: '医師3', sec: 160, who: '事務' },
+    { date: '11/10', id: 'A-0969', doctor: '医師1', sec: 245, who: '医師' },
+    { date: '11/7',  id: 'A-0952', doctor: '医師2', sec: 370, who: '事務' }
   ];
 
-  var STORAGE_KEY = 'taiinSummaryMockRecords';
-
-  // ---------- 状態 ----------
-  var current = 0;            // いま②で開いている患者（patients の添字）
-  var timerStart = null;      // タイマー開始時刻（ms）
-  var timerId = null;
-  var elapsedMs = 0;          // 確定時の経過時間
-  var confirmed = false;      // いまの下書きが確定済みか
-
-  // ---------- 便利関数 ----------
-  function $(id) { return document.getElementById(id); }
-  function pad2(n) { return (n < 10 ? '0' : '') + n; }
-  function fmtClock(ms) {
-    var s = Math.floor(ms / 1000);
-    return Math.floor(s / 60) + ':' + pad2(s % 60);
-  }
-  function fmtJa(ms) {
-    var s = Math.floor(ms / 1000);
-    return Math.floor(s / 60) + '分' + pad2(s % 60) + '秒';
-  }
-  function todayLabel() {
-    var d = new Date();
-    return (d.getMonth() + 1) + '/' + d.getDate();
-  }
-
-  function loadRecords() {
-    try {
-      var raw = window.localStorage.getItem(STORAGE_KEY);
-      var arr = raw ? JSON.parse(raw) : [];
-      return Array.isArray(arr) ? arr : [];
-    } catch (e) { return []; }
-  }
-  function saveRecords(arr) {
-    try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(arr)); } catch (e) { /* 保存できない環境では何もしない */ }
-  }
-  var addedRecords = loadRecords();
-
-  // ---------- タブ ----------
-  function showTab(n) {
-    var i;
-    for (i = 1; i <= 3; i++) {
-      $('tab' + i).setAttribute('aria-selected', i === n ? 'true' : 'false');
-      $('panel' + i).className = 'panel' + (i === n ? ' active' : '');
-    }
-    if (n === 2) startTimer();
-    if (n === 3) renderRecords();
-  }
-  var tabButtons = document.querySelectorAll('.tabs button');
-  Array.prototype.forEach.call(tabButtons, function (b) {
-    b.addEventListener('click', function () { showTab(parseInt(b.getAttribute('data-tab'), 10)); });
+  // ---------- 保存（練習で押した分。読めない環境でも落ちない） ----------
+  var KEY = 'taiin-mock-v2';
+  function load() { try { var s = localStorage.getItem(KEY); return s ? JSON.parse(s) : {}; } catch (e) { return {}; } }
+  function save(o) { try { localStorage.setItem(KEY, JSON.stringify(o)); } catch (e) {} }
+  var saved = load();
+  P.forEach(function (p) {
+    var s = saved[p.id];
+    if (!s) return;
+    if (s.status) p.status = s.status;
+    if (s.sec != null) p.sec = s.sec;
+    if (s.doneAt) p.doneAt = s.doneAt;
+    if (s.draftBy) { p.draftBy = s.draftBy; p.draftAt = s.draftAt; }
+    if (s.f) s.f.forEach(function (fv, i) { if (p.f[i]) { p.f[i].v = fv.v; p.f[i].warn = fv.warn; } });
   });
-
-  // ---------- ① 患者の表 ----------
-  function renderPatients() {
-    var tbody = $('patientRows');
-    tbody.innerHTML = '';
-    patients.forEach(function (p, idx) {
-      var tr = document.createElement('tr');
-      var cells = [p.id, p.name, p.dept, p.stay, p.doctor];
-      cells.forEach(function (c) {
-        var td = document.createElement('td');
-        td.textContent = c;
-        tr.appendChild(td);
-      });
-      var tdStatus = document.createElement('td');
-      tdStatus.textContent = p.status;
-      tdStatus.className = 'status' + (p.status === '確認済み' ? ' done' : '');
-      tdStatus.id = 'status-' + idx;
-      tr.appendChild(tdStatus);
-
-      var tdBtn = document.createElement('td');
-      var btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'btn small';
-      btn.textContent = '下書きを作る';
-      btn.addEventListener('click', function () { makeDraft(idx, btn); });
-      tdBtn.appendChild(btn);
-      tr.appendChild(tdBtn);
-      tbody.appendChild(tr);
-    });
+  function persist(p) {
+    saved[p.id] = { status: p.status, sec: p.sec, doneAt: p.doneAt, draftBy: p.draftBy, draftAt: p.draftAt,
+      f: p.f.map(function (x) { return { v: x.v, warn: !!x.warn }; }) };
+    save(saved);
   }
 
-  function makeDraft(idx, btn) {
-    var td = $('status-' + idx);
-    btn.disabled = true;
-    td.textContent = '作成中…（約1分）';
-    td.className = 'status making';
-    window.setTimeout(function () {
-      patients[idx].status = '下書きあり';
-      td.textContent = '下書きあり';
-      td.className = 'status';
-      btn.disabled = false;
-      openDraft(idx);
-      showTab(2);
-    }, 1000);
+  // ---------- 共通 ----------
+  var view = document.getElementById('view');
+  var role = 'doctor';
+  var timer = null, startAt = 0;
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function byId(id) { for (var i = 0; i < P.length; i++) if (P[i].id === id) return P[i]; return null; }
+  function fmt(sec) { var m = Math.floor(sec / 60), s = sec % 60; return (m ? m + '分' : '') + (s < 10 && m ? '0' + s : s) + '秒'; }
+  function nowHM() { var d = new Date(); return d.getHours() + ':' + ('0' + d.getMinutes()).slice(-2); }
+  function toast(msg) { var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._h); t._h = setTimeout(function () { t.classList.remove('show'); }, 2600); }
+  function stopTimer() { if (timer) { clearInterval(timer); timer = null; } }
+  function statusChip(p) {
+    if (p.status === 'done') return '<span class="chip done">確定済み</span>';
+    if (p.status === 'review') return '<span class="chip review">確認待ち</span>';
+    if (p.status === 'making') return '<span class="chip making">下書きを作成中</span>';
+    return '<span class="chip none">下書きなし</span>';
   }
+  function warnCount(p) { return p.f.filter(function (f) { return f.warn && !f.v; }).length; }
 
-  // ---------- ② 下書きの確認 ----------
-  function renderFields(p) {
-    var wrap = $('fields');
-    wrap.innerHTML = '';
-    FIELD_NAMES.forEach(function (name, i) {
-      var div = document.createElement('div');
-      div.className = 'field';
-      var h = document.createElement('h3');
-      h.textContent = name;
-      var ta = document.createElement('textarea');
-      ta.value = p.text[i];
-      ta.setAttribute('aria-label', name);
-      div.appendChild(h);
-      div.appendChild(ta);
-      wrap.appendChild(div);
-    });
-  }
-
-  function openDraft(idx) {
-    current = idx;
-    $('summaryTitle').textContent = patients[idx].name + ' の退院時サマリー（下書き）';
-    renderFields(patients[idx]);
-    resetTimer();
-    confirmed = false;
-    $('confirmBtn').disabled = false;
-    $('confirmMsg').textContent = '';
-    $('dummyMsg').textContent = '';
-  }
-
-  function resetTimer() {
-    if (timerId) { window.clearInterval(timerId); timerId = null; }
-    timerStart = null;
-    elapsedMs = 0;
-    $('timer').textContent = '0:00';
-  }
-  function startTimer() {
-    if (confirmed || timerId) return;
-    if (timerStart === null) timerStart = Date.now();
-    timerId = window.setInterval(function () {
-      $('timer').textContent = fmtClock(Date.now() - timerStart);
-    }, 250);
-  }
-  function stopTimer() {
-    if (timerId) { window.clearInterval(timerId); timerId = null; }
-    elapsedMs = timerStart === null ? 0 : Date.now() - timerStart;
-    $('timer').textContent = fmtClock(elapsedMs);
-  }
-
-  $('confirmBtn').addEventListener('click', function () {
-    if (confirmed) return;
+  // ---------- 役割の切り替え ----------
+  var roleBtns = document.querySelectorAll('.roles button');
+  roleBtns.forEach(function (b) {
+    b.addEventListener('click', function () { setRole(b.getAttribute('data-role')); });
+  });
+  function setRole(r) {
+    role = r;
+    roleBtns.forEach(function (b) { b.setAttribute('aria-selected', b.getAttribute('data-role') === r ? 'true' : 'false'); });
     stopTimer();
-    confirmed = true;
-    $('confirmBtn').disabled = true;
-    $('confirmMsg').textContent = '確定しました（医師の確認 ' + fmtJa(elapsedMs) + '）';
-
-    var p = patients[current];
-    p.status = '確認済み';
-    var td = $('status-' + current);
-    if (td) { td.textContent = '確認済み'; td.className = 'status done'; }
-
-    addedRecords.unshift({ date: todayLabel(), id: p.id, doctor: p.doctor, time: fmtJa(elapsedMs), user: '医師' });
-    saveRecords(addedRecords);
-    renderRecords();
-  });
-
-  function showDummy() {
-    var el = $('dummyMsg');
-    el.textContent = 'モックのため動きません';
-    window.setTimeout(function () { if (el.textContent === 'モックのため動きません') el.textContent = ''; }, 3000);
+    if (r === 'doctor') renderDoctorHome();
+    else if (r === 'clerk') renderClerk();
+    else renderAdmin();
+    window.scrollTo(0, 0);
   }
-  $('printBtn').addEventListener('click', showDummy);
-  $('sendBtn').addEventListener('click', showDummy);
 
-  // ---------- ③ 記録 ----------
-  function renderRecords() {
-    var tbody = $('recordRows');
-    tbody.innerHTML = '';
-    function addRow(r, added) {
-      var tr = document.createElement('tr');
-      if (added) tr.className = 'added';
-      [r.date, r.id, r.doctor, r.time, r.user].forEach(function (c) {
-        var td = document.createElement('td');
-        td.textContent = c;
-        tr.appendChild(td);
-      });
-      tbody.appendChild(tr);
+  // ---------- 医師：今日の一覧 ----------
+  function renderDoctorHome() {
+    stopTimer();
+    var order = { review: 0, none: 1, making: 1, done: 2 };
+    var list = P.slice().sort(function (a, b) { return order[a.status] - order[b.status]; });
+    var waiting = P.filter(function (p) { return p.status === 'review'; }).length;
+    var h = '<h1>医師1 先生　今日の確認待ち ' + waiting + '件</h1>' +
+      '<p class="sub">下書きは事務が作ってあります。開いて読み、合っていれば「確認しました」を押すだけです。直したい所は、その場で直せます。</p>';
+    list.forEach(function (p) {
+      var wc = warnCount(p);
+      h += '<div class="card"><div class="row">' +
+        '<div><div class="pname">' + esc(p.name) + '<span class="pid">' + esc(p.id) + '・' + esc(p.age) + '</span></div>' +
+        '<div class="pmeta">' + esc(p.dept) + ' ' + esc(p.ward) + '　入院 ' + esc(p.admit) + ' 〜 退院 ' + esc(p.dis) + '（今日）</div>' +
+        (p.status === 'review' ? '<div class="pmeta">下書き：' + esc(p.draftBy) + ' が ' + esc(p.draftAt) + ' に作成' + (wc ? '　<span class="chip warn">要確認 ' + wc + '項目</span>' : '') + '</div>' : '') +
+        (p.status === 'done' ? '<div class="pmeta">' + esc(p.doneAt) + ' に確定（確認にかかった時間 ' + fmt(p.sec) + '）</div>' : '') +
+        (p.status === 'none' ? '<div class="pmeta">事務がまだ下書きを作っていません</div>' : '') +
+        '</div><div class="spacer"></div>' + statusChip(p) +
+        (p.status === 'review' ? '<button class="btn primary big" data-open="' + p.id + '">開く</button>' : '') +
+        (p.status === 'done' ? '<button class="btn ghost" data-open="' + p.id + '">見る</button>' : '') +
+        (p.status === 'none' ? '<button class="btn secondary" data-make="' + p.id + '">下書きを作る</button>' : '') +
+        '</div></div>';
+    });
+    view.innerHTML = h;
+    view.querySelectorAll('[data-open]').forEach(function (b) { b.addEventListener('click', function () { renderReview(b.getAttribute('data-open')); }); });
+    view.querySelectorAll('[data-make]').forEach(function (b) { b.addEventListener('click', function () { makeDraft(b.getAttribute('data-make'), function () { renderDoctorHome(); }); }); });
+  }
+
+  // ---------- 医師：確認の画面 ----------
+  function renderReview(id) {
+    var p = byId(id);
+    if (!p) return renderDoctorHome();
+    var readOnly = p.status === 'done';
+    stopTimer();
+    if (!readOnly) {
+      startAt = Date.now();
+      timer = setInterval(function () {
+        var el = document.getElementById('tm');
+        if (el) el.textContent = fmt(Math.floor((Date.now() - startAt) / 1000));
+      }, 1000);
     }
-    addedRecords.forEach(function (r) { addRow(r, true); });
-    sampleRecords.forEach(function (r) { addRow(r, false); });
-    $('monthCount').textContent = String(23 + addedRecords.length);
+    var h = '<div class="back"><button class="link" id="back">← 一覧にもどる</button></div>' +
+      '<div class="phead"><div><div class="pname">' + esc(p.name) + '<span class="pid">' + esc(p.id) + '・' + esc(p.age) + '</span></div>' +
+      '<div class="pmeta">' + esc(p.dept) + ' ' + esc(p.ward) + '　入院 ' + esc(p.admit) + ' 〜 退院 ' + esc(p.dis) + '　主治医 ' + esc(p.doctor) + '</div>' +
+      (readOnly ? '<div class="pmeta">' + esc(p.doneAt) + ' に確定済み（確認にかかった時間 ' + fmt(p.sec) + '）</div>'
+                : '<div class="pmeta">下書き：' + esc(p.draftBy) + ' が ' + esc(p.draftAt) + ' に作成。文はカルテの記録から作っています。各項目の「記録を見る」で元の記録が出ます。</div>') +
+      '</div><div class="spacer"></div>' + statusChip(p) + '</div>' +
+      '<div id="alert"></div><div id="fields"></div>';
+    view.innerHTML = h;
+    document.getElementById('back').addEventListener('click', function () { renderDoctorHome(); });
+    renderFields(p, readOnly);
+
+    var bar = document.createElement('div');
+    bar.className = 'actions';
+    bar.innerHTML = '<div class="actions-in">' +
+      (readOnly
+        ? '<button class="btn ghost" id="print">印刷する</button><div class="spacer"></div><span class="timer">確定済みのため直せません</span>'
+        : '<button class="btn ok big" id="confirm">確認しました（確定）</button><button class="btn ghost" id="later">あとで</button>' +
+          '<div class="spacer"></div><span class="timer"><span class="dot"></span>確認を始めて <span id="tm">0秒</span>（自動で記録）</span>') +
+      '</div>';
+    view.appendChild(bar);
+    if (readOnly) {
+      document.getElementById('print').addEventListener('click', function () { window.print(); });
+    } else {
+      document.getElementById('later').addEventListener('click', function () { renderDoctorHome(); });
+      document.getElementById('confirm').addEventListener('click', function () { confirmDoc(p); });
+    }
   }
 
-  $('resetBtn').addEventListener('click', function () {
-    addedRecords = [];
-    saveRecords(addedRecords);
-    renderRecords();
-  });
+  function renderFields(p, readOnly) {
+    var box = document.getElementById('fields');
+    var h = '';
+    p.f.forEach(function (f, i) {
+      var pending = f.warn && !f.v;
+      h += '<section class="field' + (pending ? ' warn' : '') + '" id="f' + i + '">' +
+        '<div class="flabel">' + esc(f.k) + (pending ? '<span class="chip warn">要確認</span>' : '') + '</div>' +
+        '<div id="fv' + i + '">' +
+        (pending
+          ? '<div class="fval empty">記録に見当たりません。AIは作文しません。先生が確認してください。</div>' +
+            (readOnly ? '' : '<div class="editbar"><button class="btn secondary" data-none="' + i + '">なし</button><button class="btn ghost" data-edit="' + i + '">入力する</button></div>')
+          : '<div class="fval">' + esc(f.v) + '</div>') +
+        '</div>' +
+        '<div class="fsrc">' +
+        (f.s.length ? '<span>出どころ：' + f.s.map(function (j) { return esc(p.rec[j].d) + ' ' + esc(p.rec[j].k); }).join('、') + '</span>' +
+          '<button class="link" data-src="' + i + '">記録を見る</button>' : (pending ? '' : '<span>出どころ：先生の入力</span>')) +
+        (!readOnly && !pending ? '<button class="link" data-edit="' + i + '">直す</button>' : '') +
+        '</div><div class="srcs" id="src' + i + '" hidden>' +
+        f.s.map(function (j) { return '<div class="src"><span class="d">' + esc(p.rec[j].d) + '</span><span class="k">' + esc(p.rec[j].k) + '</span>' + esc(p.rec[j].t) + '</div>'; }).join('') +
+        '</div></section>';
+    });
+    box.innerHTML = h;
+    box.querySelectorAll('[data-src]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var el = document.getElementById('src' + b.getAttribute('data-src'));
+        el.hidden = !el.hidden; b.textContent = el.hidden ? '記録を見る' : '記録を閉じる';
+      });
+    });
+    box.querySelectorAll('[data-edit]').forEach(function (b) {
+      b.addEventListener('click', function () { editField(p, +b.getAttribute('data-edit'), readOnly); });
+    });
+    box.querySelectorAll('[data-none]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var i = +b.getAttribute('data-none');
+        p.f[i].v = 'なし（医師が確認）'; p.f[i].warn = false; persist(p); renderFields(p, readOnly);
+      });
+    });
+  }
 
-  // ---------- 初期表示 ----------
-  renderPatients();
-  openDraft(0);
-  renderRecords();
+  function editField(p, i, readOnly) {
+    var f = p.f[i];
+    var host = document.getElementById('fv' + i);
+    host.innerHTML = '<textarea id="ta' + i + '" aria-label="' + esc(f.k) + '">' + esc(f.v) + '</textarea>' +
+      '<div class="editbar"><button class="btn primary" id="sv' + i + '">保存</button><button class="btn ghost" id="cx' + i + '">やめる</button></div>';
+    var ta = document.getElementById('ta' + i); ta.focus();
+    document.getElementById('sv' + i).addEventListener('click', function () {
+      f.v = ta.value.trim(); if (f.v) f.warn = false; persist(p); renderFields(p, readOnly);
+    });
+    document.getElementById('cx' + i).addEventListener('click', function () { renderFields(p, readOnly); });
+  }
+
+  function confirmDoc(p) {
+    var idx = -1;
+    p.f.forEach(function (f, i) { if (idx < 0 && f.warn && !f.v) idx = i; });
+    if (idx >= 0) {
+      document.getElementById('alert').innerHTML = '<div class="alert">要確認の項目が残っています。「' + esc(p.f[idx].k) + '」を先に確認してください。</div>';
+      var el = document.getElementById('f' + idx);
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.classList.add('flash'); setTimeout(function () { el.classList.remove('flash'); }, 1600);
+      return;
+    }
+    var sec = Math.max(1, Math.floor((Date.now() - startAt) / 1000));
+    stopTimer();
+    p.status = 'done'; p.sec = sec; p.doneAt = nowHM(); persist(p);
+    renderDone(p);
+  }
+
+  function renderDone(p) {
+    view.innerHTML = '<div class="card done-card">' +
+      '<div class="ck"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg></div>' +
+      '<h1>' + esc(p.name) + ' の退院時サマリーを確定しました</h1>' +
+      '<p class="t">確認にかかった時間　<b>' + fmt(p.sec) + '</b>（自動で記録しました）</p>' +
+      '<div class="btns"><button class="btn primary big" id="next">次の患者へ</button><button class="btn ghost big" id="print">印刷する</button></div>' +
+      '<div class="minor"><button class="link" id="send">国の仕組みへデータで送る（準備中）</button><button class="link" id="letter">紹介状の下書きを作る（同じ内容から）</button></div>' +
+      '</div>';
+    document.getElementById('next').addEventListener('click', function () { renderDoctorHome(); });
+    document.getElementById('print').addEventListener('click', function () { toast('画面の例のため、印刷は動きません'); });
+    document.getElementById('send').addEventListener('click', function () { toast('国の仕組みへの送信は準備中です（画面の例）'); });
+    document.getElementById('letter').addEventListener('click', function () { toast('紹介状の下書きを作りました（画面の例のため表示のみ）'); });
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- 事務：下書きを作る ----------
+  function renderClerk() {
+    stopTimer();
+    var h = '<h1>事務A さん　今日退院する患者 ' + P.length + '人</h1>' +
+      '<p class="sub">カルテの記録を貼り付けて「下書きを作る」を押すと、国が決めた項目の形で下書きができます。できた下書きは主治医の「確認待ち」に入ります。</p>' +
+      '<ul class="steps"><li><b>1</b>記録を貼り付ける</li><li><b>2</b>下書きを作る（約1分）</li><li><b>3</b>医師が確認して確定</li></ul>';
+    P.forEach(function (p) {
+      h += '<div class="card"><div class="row">' +
+        '<div><div class="pname">' + esc(p.name) + '<span class="pid">' + esc(p.id) + '・' + esc(p.age) + '</span></div>' +
+        '<div class="pmeta">' + esc(p.dept) + ' ' + esc(p.ward) + '　入院 ' + esc(p.admit) + ' 〜 退院 ' + esc(p.dis) + '　主治医 ' + esc(p.doctor) + '</div>' +
+        (p.status === 'review' ? '<div class="pmeta">' + esc(p.draftBy) + ' が ' + esc(p.draftAt) + ' に作成。' + esc(p.doctor) + ' の確認待ち</div>' : '') +
+        (p.status === 'done' ? '<div class="pmeta">' + esc(p.doneAt) + ' に ' + esc(p.doctor) + ' が確定</div>' : '') +
+        '</div><div class="spacer"></div>' + statusChip(p) +
+        (p.status === 'none' ? '<button class="btn primary big" data-make="' + p.id + '">下書きを作る</button>' : '') +
+        '</div><div id="mk-' + p.id + '"></div></div>';
+    });
+    view.innerHTML = h;
+    view.querySelectorAll('[data-make]').forEach(function (b) {
+      b.addEventListener('click', function () { openMake(b.getAttribute('data-make')); });
+    });
+  }
+
+  function openMake(id) {
+    var p = byId(id);
+    var host = document.getElementById('mk-' + id);
+    var recText = p.rec.map(function (r) { return r.d + ' ' + r.k + '：' + r.t; }).join('\n');
+    host.innerHTML = '<div style="margin-top:16px">' +
+      '<div class="flabel">カルテの記録（貼り付け）<span class="chip none">最初は電子カルテとつながず、ここに貼り付けます</span></div>' +
+      '<textarea class="rec" id="rec-' + id + '" aria-label="カルテの記録">' + esc(recText) + '</textarea>' +
+      '<div class="editbar"><button class="btn primary big" id="go-' + id + '">下書きを作る</button><button class="btn ghost" id="cancel-' + id + '">やめる</button></div>' +
+      '<div id="prog-' + id + '"></div></div>';
+    host.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('cancel-' + id).addEventListener('click', function () { host.innerHTML = ''; });
+    document.getElementById('go-' + id).addEventListener('click', function () {
+      makeDraft(id, function () { renderClerk(); var el = document.getElementById('mk-' + id); if (el) { el.innerHTML = resultBox(p); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }, document.getElementById('prog-' + id));
+    });
+  }
+
+  function resultBox(p) {
+    var wc = warnCount(p);
+    return '<div class="result"><b>下書きができました。</b>' + esc(p.doctor) + ' の確認待ちに入りました。' +
+      (wc ? '<br>記録に見当たらない項目が ' + wc + ' つあります（' + p.f.filter(function (f) { return f.warn && !f.v; }).map(function (f) { return esc(f.k); }).join('、') + '）。AIは作文せず、医師が確認します。' : '<br>記録に見当たらない項目はありません。') +
+      '</div>';
+  }
+
+  function makeDraft(id, done, progHost) {
+    var p = byId(id);
+    p.status = 'making';
+    var host = progHost || null;
+    if (host) {
+      host.innerHTML = '<div class="progress"><i id="pg-' + id + '"></i></div><div class="note">作成中です（実際は約1分）…</div>';
+      setTimeout(function () { var i = document.getElementById('pg-' + id); if (i) i.style.width = '100%'; }, 30);
+    } else {
+      toast('下書きを作成中です（実際は約1分）');
+    }
+    setTimeout(function () {
+      p.status = 'review'; p.draftBy = (role === 'clerk' ? '事務A' : '医師1'); p.draftAt = nowHM(); persist(p);
+      done();
+    }, host ? 2300 : 1200);
+  }
+
+  // ---------- 管理：記録 ----------
+  function renderAdmin() {
+    stopTimer();
+    var extra = P.filter(function (p) { return p.status === 'done' && p.doneAt && p.id !== 'A-1044'; })
+      .map(function (p) { return { date: '今日', id: p.id, doctor: p.doctor, sec: p.sec, who: '医師' }; });
+    var log = extra.concat([{ date: '今日', id: 'A-1044', doctor: '医師1', sec: 190, who: '医師' }], SAMPLE_LOG);
+    var sum = 0; log.forEach(function (r) { sum += r.sec; });
+    var avg = Math.round(sum / log.length);
+    var month = 23 + extra.length;
+    var h = '<h1>使われ方の記録（今週）</h1>' +
+      '<p class="sub">届け出と、年1回の評価に使う数字です。医師の確認にかかった時間は、確定のたびに自動で残ります。</p>' +
+      '<div class="kpi">' +
+      '<div class="card"><div class="l">今週使った人</div><div class="n">医師 9<small>/12人</small></div><div class="bar"><i style="width:75%"></i></div>' +
+      '<div class="n" style="font-size:1.6rem;margin-top:10px">事務 4<small>/5人</small></div><div class="bar g"><i style="width:80%"></i></div><div class="m">目安：医師または事務の過半数が毎週使っていること</div></div>' +
+      '<div class="card"><div class="l">医師の確認にかかった時間（平均）</div><div class="n">' + fmt(avg).replace(/(\d+)分/, '$1<small>分</small>').replace(/(\d+)秒/, '$1<small>秒</small>') + '</div><div class="m">1件あたり。下書きを開いてから確定まで</div></div>' +
+      '<div class="card"><div class="l">今月 確定した件数</div><div class="n">' + month + '<small>件</small></div><div class="m">退院時サマリー</div></div>' +
+      '</div>' +
+      '<div class="card"><div class="tblwrap"><table><thead><tr><th>日付</th><th>患者ID</th><th>主治医</th><th>確認にかかった時間</th><th>下書きを作った人</th></tr></thead><tbody>' +
+      log.map(function (r) { return '<tr><td>' + esc(r.date) + '</td><td>' + esc(r.id) + '</td><td>' + esc(r.doctor) + '</td><td>' + fmt(r.sec) + '</td><td>' + esc(r.who) + '</td></tr>'; }).join('') +
+      '</tbody></table></div></div>' +
+      '<div class="card">' +
+      '<p class="note">この記録は、2026年6月1日からの国の決まり（AIの下書きを病院として入れ、大半の医師と事務の人が日常的に使う病院は、事務の人1人を1.2人と数えてよい）の届け出と、年1回の評価に使います。</p>' +
+      '<p class="note">数字はすべてサンプルです。</p>' +
+      '<div class="editbar"><button class="btn secondary" id="exp1">届け出用に書き出す（準備中）</button><button class="btn secondary" id="exp2">年1回の評価用に書き出す（準備中）</button></div>' +
+      '<div style="margin-top:14px"><button class="link small" id="reset">練習で押した分をもどす</button></div>' +
+      '</div>';
+    view.innerHTML = h;
+    document.getElementById('exp1').addEventListener('click', function () { toast('書き出しは準備中です（画面の例）'); });
+    document.getElementById('exp2').addEventListener('click', function () { toast('書き出しは準備中です（画面の例）'); });
+    document.getElementById('reset').addEventListener('click', function () {
+      try { localStorage.removeItem(KEY); } catch (e) {}
+      location.hash = ''; location.reload();
+    });
+  }
+
+  // ---------- 最初の表示（#role=clerk / #open=A-1023 で直接開ける） ----------
+  var hash = {};
+  location.hash.replace(/^#/, '').split('&').forEach(function (kv) { var a = kv.split('='); if (a[0]) hash[a[0]] = decodeURIComponent(a[1] || ''); });
+  setRole(hash.role === 'clerk' || hash.role === 'admin' ? hash.role : 'doctor');
+  if (hash.open && role === 'doctor' && byId(hash.open)) renderReview(hash.open);
 })();
 </script>
 </body>
