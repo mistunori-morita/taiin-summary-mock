@@ -161,14 +161,14 @@ textarea.rec{border:1px solid var(--line2);min-height:230px;font-size:.98rem}
 .timer .live{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
 
 /* ---------- 完了 ---------- */
-.done{max-width:640px;margin:40px auto;text-align:center;padding:44px 32px 36px}
-.done .ck{width:76px;height:76px;border-radius:50%;background:var(--green-soft);color:var(--green);display:inline-grid;place-items:center;margin-bottom:14px}
-.done .ck svg.i{width:38px;height:38px;stroke-width:2.5}
-.done h2{margin:0 0 6px;font-size:1.4rem}
-.done .t{color:var(--ink2);font-size:1rem;margin:0 0 22px}
-.done .t b{font-size:1.25rem;color:var(--ink)}
-.done .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.done .minor{margin-top:20px;display:flex;gap:6px 22px;justify-content:center;flex-wrap:wrap}
+.donecard{max-width:640px;margin:40px auto;text-align:center;padding:44px 32px 36px}
+.donecard .ck{width:76px;height:76px;border-radius:50%;background:var(--green-soft);color:var(--green);display:inline-grid;place-items:center;margin-bottom:14px}
+.donecard .ck svg.i{width:38px;height:38px;stroke-width:2.5}
+.donecard h2{margin:0 0 6px;font-size:1.4rem}
+.donecard .t{color:var(--ink2);font-size:1rem;margin:0 0 22px}
+.donecard .t b{font-size:1.25rem;color:var(--ink)}
+.donecard .btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.donecard .minor{margin-top:20px;display:flex;gap:6px 22px;justify-content:center;flex-wrap:wrap}
 
 /* ---------- 事務 ---------- */
 .steps{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px;padding:0;list-style:none}
@@ -224,7 +224,7 @@ body.touring .content{padding-top:150px}
 @keyframes blink{50%{color:transparent}}
 .doc.fillin .sec{animation:fill 1s ease-out}
 @keyframes fill{from{background:#FFF7D6}to{background:#fff}}
-.done .t2{color:var(--ink2);font-size:.95rem;margin:-12px 0 20px}
+.donecard .t2{color:var(--ink2);font-size:.95rem;margin:-12px 0 20px}
 @media (max-width:820px){.diff{grid-template-columns:1fr}.darrow{transform:rotate(90deg)}.flow{flex-direction:column}.farrow{transform:rotate(90deg)}}
 .tag{display:inline-block;background:#EEF2F6;color:#1F2937;border:1px solid #CBD5E1;border-radius:999px;padding:3px 11px;font-size:.9rem;font-weight:500}
 .toast{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:#0F172A;color:#fff;padding:12px 20px;border-radius:12px;font-size:.98rem;opacity:0;transition:opacity .2s;pointer-events:none;z-index:6;max-width:90vw;text-align:center;box-shadow:var(--shadow)}
@@ -628,7 +628,7 @@ body.touring .content{padding-top:150px}
   }
   function renderDone(p) {
     setTitle('確定しました');
-    view.innerHTML = '<div class="card done"><div class="ck">' + ic('check') + '</div><h2>' + esc(p.name) + ' の退院時サマリーを確定しました</h2>' +
+    view.innerHTML = '<div class="card donecard"><div class="ck">' + ic('check') + '</div><h2>' + esc(p.name) + ' の退院時サマリーを確定しました</h2>' +
       '<p class="t">確認にかかった時間　<b>' + fmt(p.sec) + '</b>　自動で記録しました</p>' +
       '<p class="t2">今までの書き方の例：1件 10〜15分（藤田医科大学病院）。この画面の報告の目安：全体で約5分以内（恵寿総合病院）</p>' +
       '<div class="btns"><button class="btn primary lg" id="next">次の患者へ' + ic('arrow') + '</button><button class="btn ghost lg" id="print">' + ic('print') + '印刷する</button></div>' +
